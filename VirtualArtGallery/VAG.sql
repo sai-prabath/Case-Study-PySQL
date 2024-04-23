@@ -1,3 +1,7 @@
+CREATE DATABASE VirtualArtGallery
+
+USE VirtualArtGallery
+
 -- Artwork table
 CREATE TABLE Artwork (
     ArtworkID INT PRIMARY KEY AUTO_INCREMENT,
@@ -6,8 +10,7 @@ CREATE TABLE Artwork (
     CreationDate DATE,
     Medium VARCHAR(100),
     ImageURL VARCHAR(255),
-    ArtistID INT, -- Foreign Key referencing Artist.ArtistID
-    FOREIGN KEY (ArtistID) REFERENCES Artist(ArtistID)
+    ArtistID INT
 );
 
 -- Artist table
@@ -20,6 +23,9 @@ CREATE TABLE Artist (
     Website VARCHAR(255),
     ContactInformation VARCHAR(255)
 );
+
+-- Foreign Key referencing Artist.ArtistID
+ALTER TABLE Artwork ADD FOREIGN KEY (ArtistID) REFERENCES Artist(ArtistID);
 
 -- User table
 CREATE TABLE User (

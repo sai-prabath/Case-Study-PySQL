@@ -187,7 +187,7 @@ class MainModule:
         except Exception as e:
             print(f"Error displaying galleries: {e}")
 
-    def add_artist(self):
+    def create_artist(self):
         try:
             name = input("Enter artist name: ")
             biography = input("Enter artist biography: ")
@@ -274,7 +274,12 @@ class MainModule:
             print("6. Add Artwork to Favorites")
             print("7. Remove Artwork from Favorites")
             print("8. Get User's Favorite Artworks")
-            print("9. Exit")
+            print("9. Add Artist")
+            print("10. Add Gallery")
+            print("11. Update Gallery")
+            print("12. Remove Gallery")
+            print("13. Search Galleries")
+            print("14. Exit")
             choice = input("Enter your choice: ")
 
             if choice == "1":
@@ -294,6 +299,16 @@ class MainModule:
             elif choice == "8":
                 self.get_user_favorite_artworks()
             elif choice == "9":
+                self.create_artist()
+            elif choice == "10":
+                self.create_gallery()
+            elif choice == "11":
+                self.update_gallery()
+            elif choice == "12":
+                self.remove_gallery()
+            elif choice == "13":
+                self.search_galleries()
+            elif choice == "14":
                 print("Exiting...")
                 break
             else:

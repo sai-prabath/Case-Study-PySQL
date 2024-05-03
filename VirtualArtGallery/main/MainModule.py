@@ -20,12 +20,16 @@ class MainModule:
             lastName = input("Enter last Name: ")
             birthDate = input("Enter : birthDate")
             profilePicture = input("select profilePicture(enter url): ")
-            user = User(username, password, email, firstName, lastName, birthDate, profilePicture)
-            self.virtual_gallery.createUser(user)
-            print("User created successfully!")
-            return user.getUserID()
+            user = User(None, username, password, email, firstName, lastName, birthDate, profilePicture)
+
+            result = self.virtual_gallery.createUser(user)
+            if result[0]:
+                print("User created successfully!")
+                return result[1]
+
         except Exception as e:
             print(f"Error creating user: {e}")
+            return None
 
     def display_artworks(self):
         try:
@@ -50,10 +54,9 @@ class MainModule:
             image_url = input("Enter Image URL: ")
             artist_id = int(input("Enter Artist ID: "))
 
-            artwork = Artwork(1, title, description, creation_date, medium, image_url, artist_id)
-
-            self.virtual_gallery.addArtwork(artwork)
-            print("Artwork added successfully!")
+            artwork = Artwork(None, title, description, creation_date, medium, image_url, artist_id)
+            if self.virtual_gallery.addArtwork(artwork):
+                print("Artwork Added Successfully")
         except Exception as e:
             print(f"Error adding artwork: {e}")
 
@@ -73,8 +76,9 @@ class MainModule:
 
             artwork = Artwork(artwork_id, title, description, creation_date, medium, image_url, artist_id)
 
-            self.virtual_gallery.updateArtwork(artwork)
-            print("Artwork updated successfully!")
+            if self.virtual_gallery.updateArtwork(artwork):
+                print("Artwork updated successfully!")
+
         except ArtWorkNotFoundException as e:
             print(f"Artwork not found: {e}")
         except Exception as e:
@@ -87,20 +91,24 @@ class MainModule:
 
         try:
             artwork_id = int(input("\nEnter Artwork ID to remove: "))
-            self.virtual_gallery.removeArtwork(artwork_id)
-            print("Artwork removed successfully!")
+            if self.virtual_gallery.removeArtwork(artwork_id):
+                print("Artwork removed successfully!")
+
         except ArtWorkNotFoundException as e:
             print(f"Artwork not found: {e}")
         except Exception as e:
             print(f"Error removing artwork: {e}")
 
     def get_artwork_by_id(self):
-        artwork_id = input("Enter Artwork ID to retrieve: ")
-
         try:
+            artwork_id = input("Enter Artwork ID to retrieve: ")
             artwork = self.virtual_gallery.getArtworkById(artwork_id)
-            print("Artwork details:")
-            print(artwork)
+            if artwork:
+                print("Artwork details:")
+                print(artwork)
+            else:
+                print(f"Artwork {artwork_id} not found")
+
         except ArtWorkNotFoundException as e:
             print(f"Artwork not found: {e}")
         except Exception as e:
@@ -120,28 +128,28 @@ class MainModule:
             print(f"Error searching artworks: {e}")
 
     def add_artwork_to_favorite(self):
-        existing_user = input("Are you an existing user? (y/n): ").lower()
-        if existing_user == 'y':
-            user_id = input("Enter your user ID: ")
-        else:
-            user_id = self.create_user()
-            print(f"Your user id = {user_id}")
-
-        if not user_id:
-            print("Failed to add artwork to favorites. User ID not provided.")
-            return
-
-        arts = self.display_artworks()
-
-        if not arts:
-            print("no artworks found to add")
-            return
-
-        artwork_id = input("Enter Artwork ID to add to favorites: ")
-
         try:
-            self.virtual_gallery.addArtworkToFavorite(user_id, artwork_id)
-            print("Artwork added to favorites successfully!")
+            existing_user = input("Are you an existing user? (y/n): ").lower()
+            if existing_user == 'y':
+                user_id = input("Enter your user ID: ")
+            else:
+                user_id = self.create_user()
+                print(f"Your user id = {user_id}")
+
+            if not user_id:
+                print("Failed to add artwork to favorites. User ID not provided.")
+                return
+
+            arts = self.display_artworks()
+
+            if not arts:
+                print("no artworks found to add")
+                return
+
+            artwork_id = input("Enter Artwork ID to add to favorites: ")
+            if self.virtual_gallery.addArtworkToFavorite(user_id, artwork_id):
+                print("Artwork added to favorites successfully!")
+
         except (ArtWorkNotFoundException, UserNotFoundException) as e:
             print(f"Error adding artwork to favorites: {e}")
         except Exception as e:
@@ -151,20 +159,24 @@ class MainModule:
         try:
             user_id = self.get_user_favorite_artworks()
             artwork_id = input("Enter Artwork ID to remove from favorites: ")
-            self.virtual_gallery.removeArtworkFromFavorite(user_id, artwork_id)
-            print("Artwork removed from favorites successfully!")
+            if self.virtual_gallery.removeArtworkFromFavorite(user_id, artwork_id):
+                print("Artwork removed from favorites successfully!")
         except (ArtWorkNotFoundException, UserNotFoundException) as e:
             print(f"Error removing artwork from favorites: {e}")
         except Exception as e:
             print(f"Error removing artwork from favorites: {e}")
 
     def get_user_favorite_artworks(self):
-        user_id = input("Enter User ID to retrieve favorite artworks: ")
         try:
+            user_id = input("Enter User ID to retrieve favorite artworks: ")
             favorite_artworks = self.virtual_gallery.getUserFavoriteArtworks(user_id)
-            print("User's favorite artworks:")
-            for artwork in favorite_artworks:
-                print(artwork)
+            if favorite_artworks:
+                print("User's favorite artworks:")
+                for artwork in favorite_artworks:
+                    print(artwork)
+            else:
+                print("No favourite artworks found")
+
             return user_id
         except UserNotFoundException as e:
             print(f"User not found: {e}")
@@ -180,7 +192,7 @@ class MainModule:
                 print("Available Galleries:")
                 for gallery in galleries:
                     print(gallery)
-                    return True
+                return True
             else:
                 print("No galleries found.")
                 return False
@@ -195,22 +207,22 @@ class MainModule:
             nationality = input("Enter artist nationality: ")
             website = input("Enter artist website: ")
             contact_info = input("Enter artist contact information: ")
-            artist = Artist(1,name, biography, birth_date, nationality, website, contact_info)
-            self.virtual_gallery.addArtist(artist)
-            print("Artist added successfully!")
+            artist = Artist(None, name, biography, birth_date, nationality, website, contact_info)
+            if self.virtual_gallery.addArtist(artist):
+                print("Artist added successfully!")
         except Exception as e:
             print(f"Error adding artist: {e}")
 
     def create_gallery(self):
-        name = input("Enter gallery name: ")
-        description = input("Enter gallery description: ")
-        location = input("Enter gallery location: ")
-        opening_hours = input("Enter opening hours: ")
-        curator = input("Enter curator name : ")
-        gallery = Gallery(1,name, description, location, curator, opening_hours)
         try:
-            self.virtual_gallery.addGallery(gallery)
-            print("Gallery created successfully!")
+            name = input("Enter gallery name: ")
+            description = input("Enter gallery description: ")
+            location = input("Enter gallery location: ")
+            opening_hours = input("Enter opening hours: ")
+            curator = input("Enter curator ID : ")
+            gallery = Gallery(None, name, description, location, curator, opening_hours)
+            if self.virtual_gallery.addGallery(gallery):
+                print("Gallery created successfully!")
         except Exception as e:
             print(f"Error creating gallery: {e}")
 
@@ -225,7 +237,7 @@ class MainModule:
             description = input("Enter new description: ")
             location = input("Enter new location : ")
             opening_hours = input("Enter new opening hours : ")
-            curator = input("Enter new curator name : ")
+            curator = input("Enter new curator ID : ")
             gallery = Gallery(gallery_id, name, description, location, curator, opening_hours)
             if self.virtual_gallery.updateGallery(gallery):
                 print("Gallery updated successfully!")

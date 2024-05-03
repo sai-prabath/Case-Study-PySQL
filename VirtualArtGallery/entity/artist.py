@@ -49,4 +49,6 @@ class Artist:
     def setContactInformation(self, contactInformation):
         self.__contactInformation = contactInformation
 
-# Similar implementations for User and Gallery classes...
+    def __str__(self):
+        return f"Artist ID: {self.__artistID}\nArtist Name: {self.__name}, Contact: {self.__contactInformation}\nBirth date: {self.__birthDate}, Nationality: {self.__nationality}, Website: {self.__website}\n"
+

@@ -1,8 +1,6 @@
 class User:
-    uid=0
-    def __init__(self, username, password, email, firstName, lastName, birthDate, profilePicture):
-        User.uid += 1
-        self.__userID = User.uid
+    def __init__(self, userID, username, password, email, firstName, lastName, birthDate, profilePicture):
+        self.__userID = userID
         self.__username = username
         self.__password = password
         self.__email = email
@@ -57,3 +55,6 @@ class User:
 
     def setProfilePicture(self, profilePicture):
         self.__profilePicture = profilePicture
+
+    def __str__(self):
+        return f"User ID: {self.__userID}\nUserName: {self.__username}, email id: {self.__email}\nFirst Name: {self.__firstName}, Last Name: {self.__lastName}\nBirth Date: {self.__birthDate}, Profile Pic: {self.__profilePicture}\n"

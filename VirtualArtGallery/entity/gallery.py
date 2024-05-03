@@ -41,3 +41,7 @@ class Gallery:
 
     def setOpeningHours(self, openingHours):
         self.__openingHours = openingHours
+
+    def __str__(self):
+        return f"Gallery ID: {self.__galleryID}\nName: {self.__name}, Description: {self.__description}\nLocation: {self.__location}, Curator: {self.__curator}, Opening Hours: {self.__openingHours}\n"
+

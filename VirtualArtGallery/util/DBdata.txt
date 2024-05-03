@@ -1,0 +1,5 @@
+host=localhost
+user=root
+password=Prabath.sql@0000
+port=3306
+database=VirtualArtGallery

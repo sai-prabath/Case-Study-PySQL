@@ -1,6 +1,8 @@
 from VirtualArtGallery.dao.IVirtualArtGallery import IVirtualArtGallery
 from VirtualArtGallery.util.dbutil import DBConnection
 from VirtualArtGallery.exception.myexceptions import ArtWorkNotFoundException
+from VirtualArtGallery.entity.artwork import Artwork
+from VirtualArtGallery.entity.gallery import Gallery
 
 import mysql.connector
 
@@ -12,12 +14,19 @@ class IVirtualArtGalleryImpl(IVirtualArtGallery):
     def createUser(self,user):
         try:
             cursor = self.connection.cursor()
-            query = "INSERT INTO User (userID, username, password, email, FirstName, LastName, DateOfBirth, ProfilePicture) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
-            values = (user.getUserID(), user.getUsername(), user.getPassword(), user.getEmail(), user.getFirstName(), user.getLastName(), user.getBirthDate(), user.getProfilePicture())
+            query = "INSERT INTO User (username, password, email, FirstName, LastName, DateOfBirth, ProfilePicture) VALUES (%s, %s, %s, %s, %s, %s, %s)"
+            values = (user.getUsername(), user.getPassword(), user.getEmail(), user.getFirstName(), user.getLastName(), user.getBirthDate(), user.getProfilePicture())
             cursor.execute(query, values)
             self.connection.commit()
+
+            query = "SELECT max(userID) FROM User"
+            cursor.execute(query)
+            uid = cursor.fetchone()
+            self.connection.commit()
+
             cursor.close()
-            return True
+            return [True, uid]
+
         except mysql.connector.Error as err:
             print("Error adding user:", err)
             return False
@@ -27,11 +36,9 @@ class IVirtualArtGalleryImpl(IVirtualArtGallery):
             cursor = self.connection.cursor()
             query = "SELECT * FROM Artwork"
             cursor.execute(query)
-            artworks = []
-            for row in cursor.fetchall():
-                #artwork = Artwork(row[0], row[1], row[2], row[3], row[4], row[5])
-                artworks.append(row)
+            artwork_data = cursor.fetchall()
             cursor.close()
+            artworks = [Artwork(*data) for data in artwork_data]
             return artworks
         except mysql.connector.Error as err:
             print("Error:", err)
@@ -82,10 +89,9 @@ class IVirtualArtGalleryImpl(IVirtualArtGallery):
             cursor.execute(query, (artworkID,))
             result = cursor.fetchone()
             if result:
-                #artwork = Artwork(result[0], result[1], result[2], result[3], result[4], result[5])
-                return result
-            else:
-                raise ArtWorkNotFoundException()
+                artwork = Artwork(*result)
+                return artwork
+
         except mysql.connector.Error as err:
             print("Error:", err)
             return None
@@ -95,11 +101,9 @@ class IVirtualArtGalleryImpl(IVirtualArtGallery):
             cursor = self.connection.cursor()
             query = "SELECT * FROM Artwork WHERE title LIKE %s OR description LIKE %s"
             cursor.execute(query, (f"%{keyword}%", f"%{keyword}%"))
-            results = cursor.fetchall()
-            artworks = []
-            for result in results:
-                #artwork = Artwork(result[0], result[1], result[2], result[3], result[4], result[5])
-                artworks.append(result)
+            artwork_data = cursor.fetchall()
+            cursor.close()
+            artworks = [Artwork(*data) for data in artwork_data]
             return artworks
         except mysql.connector.Error as err:
             print("Error:", err)
@@ -132,12 +136,11 @@ class IVirtualArtGalleryImpl(IVirtualArtGallery):
     def getUserFavoriteArtworks(self, userId):
         try:
             cursor = self.connection.cursor()
-            query = "SELECT artworkID FROM User_Favorite_Artwork WHERE userID=%s"
+            query = "SELECT artworkID, title, description, creationDate, medium, imageURL, artistID FROM User_Favorite_Artwork uf join artwork aw on uf.artworkID=aw.artworkID WHERE userID=%s"
             cursor.execute(query, (userId,))
-            results = cursor.fetchall()
-            favoriteArtworks = []
-            for result in results:
-                favoriteArtworks.append(result[0])
+            artwork_data = cursor.fetchall()
+            cursor.close()
+            favoriteArtworks = [Artwork(*data) for data in artwork_data]
             return favoriteArtworks
         except mysql.connector.Error as err:
             print("Error:", err)
@@ -148,21 +151,20 @@ class IVirtualArtGalleryImpl(IVirtualArtGallery):
             cursor = self.connection.cursor()
             query = "SELECT * FROM gallery"
             cursor.execute(query)
-            galleries = []
-            for row in cursor.fetchall():
-                galleries.append(row)
+            gallery_data = cursor.fetchall()
             cursor.close()
+            galleries = [Gallery(*data) for data in gallery_data]
             return galleries
         except mysql.connector.Error as err:
             print("Error:", err)
-            return None
+            return []
 
     def addArtist(self,artist):
         try:
             cursor = self.connection.cursor()
-            query = "INSERT INTO Artist (name, biography, birthDate, nationality, website, contactInfo) VALUES (%s, %s, %s, %s, %s, %s)"
+            query = "INSERT INTO Artist (name, biography, birthDate, nationality, website, ContactInformation) VALUES (%s, %s, %s, %s, %s, %s)"
             values = (artist.getName(), artist.getBiography(), artist.getBirthDate(), artist.getNationality(),
-                      artist.getWebsite(), artist.getContactInfo())
+                      artist.getWebsite(), artist.getContactInformation())
             cursor.execute(query, values)
             self.connection.commit()
             cursor.close()
@@ -216,92 +218,11 @@ class IVirtualArtGalleryImpl(IVirtualArtGallery):
             cursor = self.connection.cursor()
             query = "SELECT * FROM Gallery WHERE name LIKE %s OR description LIKE %s"
             cursor.execute(query, ('%' + keyword + '%', '%' + keyword + '%'))
-            galleries = cursor.fetchall()
+            gallery_data = cursor.fetchall()
             cursor.close()
+            galleries=[Gallery(*data) for data in gallery_data]
             return galleries
         except mysql.connector.Error as err:
             print("Error:", err)
-            return None
-
-
-
-'''
-
-from dao.IVirtualArtGallery import IVirtualArtGallery
-from util.DBConnection import DBConnection
-from entity.Artwork import Artwork
-
-class IVirtualArtGalleryImpl(IVirtualArtGallery):
-    connection = None
-
-    def __init__(self):
-        self.connection = DBConnection.getConnection()
-
-    def addArtwork(self, artwork: Artwork) -> bool:
-        try:
-            cursor = self.connection.cursor()
-            query = "INSERT INTO Artwork (Title, Description, CreationDate, Medium, ImageURL) VALUES (%s, %s, %s, %s, %s)"
-            cursor.execute(query, (artwork.title, artwork.description, artwork.creation_date, artwork.medium, artwork.image_url))
-            self.connection.commit()
-            cursor.close()
-            return True
-        except Exception as e:
-            print("Error adding artwork:", e)
-            return False
-
-    def updateArtwork(self, artwork: Artwork) -> bool:
-        try:
-            cursor = self.connection.cursor()
-            query = "UPDATE Artwork SET Title = %s, Description = %s, CreationDate = %s, Medium = %s, ImageURL = %s WHERE ArtworkID = %s"
-            cursor.execute(query, (artwork.title, artwork.description, artwork.creation_date, artwork.medium, artwork.image_url, artwork.artwork_id))
-            self.connection.commit()
-            cursor.close()
-            return True
-        except Exception as e:
-            print("Error updating artwork:", e)
-            return False
-
-    def removeArtwork(self, artworkID: int) -> bool:
-        try:
-            cursor = self.connection.cursor()
-            query = "DELETE FROM Artwork WHERE ArtworkID = %s"
-            cursor.execute(query, (artworkID,))
-            self.connection.commit()
-            cursor.close()
-            return True
-        except Exception as e:
-            print("Error removing artwork:", e)
-            return False
-
-    def getArtworkById(self, artworkID: int) -> Artwork:
-        try:
-            cursor = self.connection.cursor()
-            query = "SELECT * FROM Artwork WHERE ArtworkID = %s"
-            cursor.execute(query, (artworkID,))
-            artwork_data = cursor.fetchone()
-            cursor.close()
-            if artwork_data:
-                artwork = Artwork(*artwork_data)
-                return artwork
-            else:
-                return None
-        except Exception as e:
-            print("Error getting artwork by ID:", e)
-            return None
-
-    def searchArtworks(self, keyword: str) -> list[Artwork]:
-        try:
-            cursor = self.connection.cursor()
-            query = "SELECT * FROM Artwork WHERE Title LIKE %s OR Description LIKE %s"
-            cursor.execute(query, ('%' + keyword + '%', '%' + keyword + '%'))
-            artworks_data = cursor.fetchall()
-            cursor.close()
-            artworks = []
-            for artwork_data in artworks_data:
-                artwork = Artwork(*artwork_data)
-                artworks.append(artwork)
-            return artworks
-        except Exception as e:
-            print("Error searching artworks:", e)
             return []
-'''
+

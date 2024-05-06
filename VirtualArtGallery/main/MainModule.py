@@ -13,6 +13,7 @@ class MainModule:
     # artwork
     def create_user(self):
         try:
+            print("\n------Creating User------\n")
             username = input("Enter username: ")
             email = input("Enter email: ")
             password = input("Enter password: ")
@@ -25,7 +26,8 @@ class MainModule:
             result = self.virtual_gallery.createUser(user)
             if result[0]:
                 print("User created successfully!")
-                return result[1]
+                print("-------------------\n")
+                return result[1][0]
 
         except Exception as e:
             print(f"Error creating user: {e}")
@@ -35,9 +37,10 @@ class MainModule:
         try:
             artworks = self.virtual_gallery.getAllArtworks()
             if artworks:
-                print("Artworks:")
+                print("\n------Artworks------\n")
                 for artwork in artworks:
                     print(artwork)
+                print("--------------------")
                 return True
             else:
                 print("No artworks found.")
@@ -171,9 +174,10 @@ class MainModule:
             user_id = input("Enter User ID to retrieve favorite artworks: ")
             favorite_artworks = self.virtual_gallery.getUserFavoriteArtworks(user_id)
             if favorite_artworks:
-                print("User's favorite artworks:")
+                print(f"\n-----User {user_id}'s favorite artworks:-----\n")
                 for artwork in favorite_artworks:
                     print(artwork)
+                print(f"---------------------------------------")
             else:
                 print("No favourite artworks found")
 

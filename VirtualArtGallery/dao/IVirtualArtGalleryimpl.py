@@ -136,7 +136,7 @@ class IVirtualArtGalleryImpl(IVirtualArtGallery):
     def getUserFavoriteArtworks(self, userId):
         try:
             cursor = self.connection.cursor()
-            query = "SELECT artworkID, title, description, creationDate, medium, imageURL, artistID FROM User_Favorite_Artwork uf join artwork aw on uf.artworkID=aw.artworkID WHERE userID=%s"
+            query = "SELECT uf.artworkID, title, description, creationDate, medium, imageURL, artistID FROM User_Favorite_Artwork uf join artwork aw on uf.artworkID=aw.artworkID WHERE userID=%s"
             cursor.execute(query, (userId,))
             artwork_data = cursor.fetchall()
             cursor.close()

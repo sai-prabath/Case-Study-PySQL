@@ -63,24 +63,59 @@ class MainModule:
         except Exception as e:
             print(f"Error adding artwork: {e}")
 
-    def update_artwork(self):
-        arts = self.display_artworks()
-        if not arts:
-            return
-
+    def get_artwork_by_id(self):
         try:
-            artwork_id = int(input("Enter Artwork ID to update: "))
+            artwork_id = input("Enter Artwork ID to retrieve: ")
+            artwork = self.virtual_gallery.getArtworkById(artwork_id)
+            if artwork:
+                print("\n--------Artwork details--------\n")
+                print(artwork)
+                print("-------------------------------\n")
+                return artwork
+            else:
+                print(f"Artwork {artwork_id} not found")
+                return False
+
+        except ArtWorkNotFoundException as e:
+            print(f"Artwork not found: {e}")
+            return False
+        except Exception as e:
+            print(f"Error retrieving artwork: {e}")
+            return False
+
+    def update_artwork(self):
+        try:
+            #artwork_id = int(input("Enter Artwork ID to update: "))
+            artwork = self.get_artwork_by_id()
+
             title = input("Enter new Title: ")
+            if title:
+                artwork.setTitle(title)
             description = input("Enter new Description: ")
+            if description:
+                artwork.setDescription(description)
             creation_date = input("Enter new Creation Date: ")
+            if creation_date:
+                artwork.setCreationDate(creation_date)
             medium = input("Enter new Medium: ")
+            if medium:
+                artwork.setMedium(medium)
             image_url = input("Enter new Image URL: ")
-            artist_id = int(input("Enter Artist ID: "))
+            if image_url:
+                artwork.setImageURL(image_url)
+            artist_id = input("Enter Artist ID: ")
+            if artist_id:
+                artwork.setArtistID(artist_id)
+            print("\n------ Updated Artwork ------\n")
+            print(artwork)
+            print("-----------------------------\n")
 
-            artwork = Artwork(artwork_id, title, description, creation_date, medium, image_url, artist_id)
-
-            if self.virtual_gallery.updateArtwork(artwork):
-                print("Artwork updated successfully!")
+            ch = input("Conform Update (y-yes)(n-no) : ")
+            if ch=='y':
+                if self.virtual_gallery.updateArtwork(artwork):
+                    print("Artwork updated successfully!")
+            else:
+                print("Updation Cancelled")
 
         except ArtWorkNotFoundException as e:
             print(f"Artwork not found: {e}")
@@ -102,21 +137,7 @@ class MainModule:
         except Exception as e:
             print(f"Error removing artwork: {e}")
 
-    def get_artwork_by_id(self):
-        try:
-            artwork_id = input("Enter Artwork ID to retrieve: ")
-            artwork = self.virtual_gallery.getArtworkById(artwork_id)
-            if artwork:
-                print("\n--------Artwork details--------\n")
-                print(artwork)
-                print("-------------------------------\n")
-            else:
-                print(f"Artwork {artwork_id} not found")
 
-        except ArtWorkNotFoundException as e:
-            print(f"Artwork not found: {e}")
-        except Exception as e:
-            print(f"Error retrieving artwork: {e}")
 
     def search_artworks(self):
         keyword = input("Enter keyword to search artworks: ")

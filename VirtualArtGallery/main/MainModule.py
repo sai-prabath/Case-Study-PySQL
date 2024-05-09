@@ -19,7 +19,7 @@ class MainModule:
             password = input("Enter password: ")
             firstName = input("Enter first Name: ")
             lastName = input("Enter last Name: ")
-            birthDate = input("Enter : birthDate")
+            birthDate = input("Enter birth Date: ")
             profilePicture = input("select profilePicture(enter url): ")
             user = User(None, username, password, email, firstName, lastName, birthDate, profilePicture)
 
@@ -107,8 +107,9 @@ class MainModule:
             artwork_id = input("Enter Artwork ID to retrieve: ")
             artwork = self.virtual_gallery.getArtworkById(artwork_id)
             if artwork:
-                print("Artwork details:")
+                print("\n--------Artwork details--------\n")
                 print(artwork)
+                print("-------------------------------\n")
             else:
                 print(f"Artwork {artwork_id} not found")
 
@@ -122,9 +123,10 @@ class MainModule:
         try:
             artworks = self.virtual_gallery.searchArtworks(keyword)
             if artworks:
-                print("Search results:")
+                print("\n--------Search results--------\n")
                 for artwork in artworks:
                     print(artwork)
+                print("--------------------------------\n")
             else:
                 print("No Artworks Found")
         except Exception as e:
@@ -193,9 +195,10 @@ class MainModule:
         try:
             galleries = self.virtual_gallery.displayGalleries()
             if galleries:
-                print("Available Galleries:")
+                print("\n--------Available Galleries--------\n")
                 for gallery in galleries:
                     print(gallery)
+                print("---------------------------------------")
                 return True
             else:
                 print("No galleries found.")
@@ -205,6 +208,7 @@ class MainModule:
 
     def create_artist(self):
         try:
+            print("\n---------Creating Artist---------\n")
             name = input("Enter artist name: ")
             biography = input("Enter artist biography: ")
             birth_date = input("Enter artist birth date: ")
@@ -212,6 +216,7 @@ class MainModule:
             website = input("Enter artist website: ")
             contact_info = input("Enter artist contact information: ")
             artist = Artist(None, name, biography, birth_date, nationality, website, contact_info)
+            print("----------------------------------\n")
             if self.virtual_gallery.addArtist(artist):
                 print("Artist added successfully!")
         except Exception as e:
@@ -281,7 +286,7 @@ class MainModule:
 
     def main(self):
         while True:
-            print("\n==== Virtual Art Gallery Menu ====")
+            print("\n------ Virtual Art Gallery Menu ------")
             print("1. Add Artwork")
             print("2. Update Artwork")
             print("3. Remove Artwork")
@@ -296,6 +301,7 @@ class MainModule:
             print("12. Remove Gallery")
             print("13. Search Galleries")
             print("14. Exit")
+            print("--------------------------------------\n")
             choice = input("Enter your choice: ")
 
             if choice == "1":

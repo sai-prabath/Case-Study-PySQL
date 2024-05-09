@@ -118,7 +118,10 @@ class IVirtualArtGalleryImpl(IVirtualArtGallery):
             cursor.close()
             return True
         except mysql.connector.Error as err:
-            print("Error:", err)
+            if err.errno == 1062:
+                print("Artwork is already in your Favourites")
+            else:
+                print("Error:", err)
             return False
 
     def removeArtworkFromFavorite(self, userId, artworkId):

@@ -190,7 +190,7 @@ class MainModule:
                 print(f"---------------------------------------")
                 return user_id
             else:
-                raise UserNotFoundException()
+                raise UserNotFoundException("No Artwork found in Favourites")
 
         except Exception as e:
             print(e)

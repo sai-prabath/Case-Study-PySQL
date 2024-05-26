@@ -42,7 +42,7 @@ class IVirtualArtGalleryImpl(IVirtualArtGallery):
             return artworks
         except mysql.connector.Error as err:
             print("Error:", err)
-            return None
+            return False
 
     def addArtwork(self, artwork):
         try:
@@ -91,10 +91,12 @@ class IVirtualArtGalleryImpl(IVirtualArtGallery):
             if result:
                 artwork = Artwork(*result)
                 return artwork
+            else:
+                return False
 
         except mysql.connector.Error as err:
             print("Error:", err)
-            return None
+            return False
 
     def searchArtworks(self, keyword):
         try:
@@ -107,7 +109,7 @@ class IVirtualArtGalleryImpl(IVirtualArtGallery):
             return artworks
         except mysql.connector.Error as err:
             print("Error:", err)
-            return []
+            return False
 
     def addArtworkToFavorite(self, userId, artworkId):
         try:
@@ -147,7 +149,7 @@ class IVirtualArtGalleryImpl(IVirtualArtGallery):
             return favoriteArtworks
         except mysql.connector.Error as err:
             print("Error:", err)
-            return []
+            return False
 
     def displayGalleries(self):
         try:
@@ -160,7 +162,7 @@ class IVirtualArtGalleryImpl(IVirtualArtGallery):
             return galleries
         except mysql.connector.Error as err:
             print("Error:", err)
-            return []
+            return False
 
     def addArtist(self,artist):
         try:
@@ -186,6 +188,22 @@ class IVirtualArtGalleryImpl(IVirtualArtGallery):
             self.connection.commit()
             cursor.close()
             return True
+        except mysql.connector.Error as err:
+            print("Error:", err)
+            return False
+
+    def getGalleryById(self, galleryID):
+        try:
+            cursor = self.connection.cursor()
+            query = "SELECT * FROM Gallery WHERE GalleryID = %s"
+            cursor.execute(query, (galleryID,))
+            result = cursor.fetchone()
+            if result:
+                gallery = Gallery(*result)
+                return gallery
+            else:
+                return False
+
         except mysql.connector.Error as err:
             print("Error:", err)
             return False
@@ -227,5 +245,5 @@ class IVirtualArtGalleryImpl(IVirtualArtGallery):
             return galleries
         except mysql.connector.Error as err:
             print("Error:", err)
-            return []
+            return False
 

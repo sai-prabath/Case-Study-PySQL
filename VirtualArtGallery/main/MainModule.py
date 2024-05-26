@@ -1,6 +1,6 @@
 from VirtualArtGallery.dao.IVirtualArtGalleryimpl import IVirtualArtGalleryImpl
-from VirtualArtGallery.exception.myexceptions import ArtWorkNotFoundException, UserNotFoundException
-from VirtualArtGallery.exception.myexceptions import ArtistNotFoundException, GalleryNotFoundException
+from VirtualArtGallery.exception.myexceptions import ArtWorkNotFoundException, UserNotFoundException, UserCreationException, ArtworkCreationException
+from VirtualArtGallery.exception.myexceptions import ArtistNotFoundException, GalleryNotFoundException, GalleryCreationException
 from VirtualArtGallery.entity.artwork import Artwork
 from VirtualArtGallery.entity.user import User
 from VirtualArtGallery.entity.gallery import Gallery
@@ -28,9 +28,11 @@ class MainModule:
                 print("User created successfully!")
                 print("-------------------\n")
                 return result[1][0]
+            else:
+                raise UserCreationException()
 
         except Exception as e:
-            print(f"Error creating user: {e}")
+            print(e)
             return None
 
     def display_artworks(self):
@@ -43,10 +45,10 @@ class MainModule:
                 print("--------------------")
                 return True
             else:
-                print("No artworks found.")
-                return False
+                raise ArtWorkNotFoundException()
         except Exception as e:
-            print(f"Error displaying Artworks: {e}")
+            print(e)
+            return False
 
     def add_artwork(self):
         try:
@@ -60,8 +62,10 @@ class MainModule:
             artwork = Artwork(None, title, description, creation_date, medium, image_url, artist_id)
             if self.virtual_gallery.addArtwork(artwork):
                 print("Artwork Added Successfully")
+            else:
+                raise ArtworkCreationException()
         except Exception as e:
-            print(f"Error adding artwork: {e}")
+            print(e)
 
     def get_artwork_by_id(self):
         try:
@@ -73,20 +77,17 @@ class MainModule:
                 print("-------------------------------\n")
                 return artwork
             else:
-                print(f"Artwork {artwork_id} not found")
-                return False
+                raise ArtWorkNotFoundException()
 
-        except ArtWorkNotFoundException as e:
-            print(f"Artwork not found: {e}")
-            return False
         except Exception as e:
-            print(f"Error retrieving artwork: {e}")
+            print(e)
             return False
 
     def update_artwork(self):
         try:
-            #artwork_id = int(input("Enter Artwork ID to update: "))
             artwork = self.get_artwork_by_id()
+            if not(artwork):
+                return
 
             title = input("Enter new Title: ")
             if title:
@@ -111,16 +112,16 @@ class MainModule:
             print("-----------------------------\n")
 
             ch = input("Conform Update (y-yes)(n-no) : ")
-            if ch=='y':
+            if ch == 'y':
                 if self.virtual_gallery.updateArtwork(artwork):
                     print("Artwork updated successfully!")
+                else:
+                    raise ArtworkCreationException("Updating Unsuccessful!!!")
             else:
                 print("Updation Cancelled")
 
-        except ArtWorkNotFoundException as e:
-            print(f"Artwork not found: {e}")
         except Exception as e:
-            print(f"Error updating artwork: {e}")
+            print(e)
 
     def remove_artwork(self):
         arts = self.display_artworks()
@@ -131,13 +132,11 @@ class MainModule:
             artwork_id = int(input("\nEnter Artwork ID to remove: "))
             if self.virtual_gallery.removeArtwork(artwork_id):
                 print("Artwork removed successfully!")
+            else:
+                raise ArtWorkNotFoundException()
 
-        except ArtWorkNotFoundException as e:
-            print(f"Artwork not found: {e}")
         except Exception as e:
-            print(f"Error removing artwork: {e}")
-
-
+            print(e)
 
     def search_artworks(self):
         keyword = input("Enter keyword to search artworks: ")
@@ -149,9 +148,9 @@ class MainModule:
                     print(artwork)
                 print("--------------------------------\n")
             else:
-                print("No Artworks Found")
+                raise ArtWorkNotFoundException()
         except Exception as e:
-            print(f"Error searching artworks: {e}")
+            print(e)
 
     def add_artwork_to_favorite(self):
         try:
@@ -169,28 +168,16 @@ class MainModule:
             arts = self.display_artworks()
 
             if not arts:
-                print("no artworks found to add")
                 return
 
             artwork_id = input("Enter Artwork ID to add to favorites: ")
             if self.virtual_gallery.addArtworkToFavorite(user_id, artwork_id):
                 print("Artwork added to favorites successfully!")
+            else:
+                raise ArtWorkNotFoundException("User/Artwork not found")
 
-        except (ArtWorkNotFoundException, UserNotFoundException) as e:
-            print(f"Error adding artwork to favorites: {e}")
         except Exception as e:
-            print(f"Error adding artwork to favorites: {e}")
-
-    def remove_artwork_from_favorite(self):
-        try:
-            user_id = self.get_user_favorite_artworks()
-            artwork_id = input("Enter Artwork ID to remove from favorites: ")
-            if self.virtual_gallery.removeArtworkFromFavorite(user_id, artwork_id):
-                print("Artwork removed from favorites successfully!")
-        except (ArtWorkNotFoundException, UserNotFoundException) as e:
-            print(f"Error removing artwork from favorites: {e}")
-        except Exception as e:
-            print(f"Error removing artwork from favorites: {e}")
+            print(e)
 
     def get_user_favorite_artworks(self):
         try:
@@ -201,14 +188,28 @@ class MainModule:
                 for artwork in favorite_artworks:
                     print(artwork)
                 print(f"---------------------------------------")
+                return user_id
             else:
-                print("No favourite artworks found")
+                raise UserNotFoundException()
 
-            return user_id
-        except UserNotFoundException as e:
-            print(f"User not found: {e}")
         except Exception as e:
-            print(f"Error retrieving user's favorite artworks: {e}")
+            print(e)
+            return None
+
+    def remove_artwork_from_favorite(self):
+        try:
+            user_id = self.get_user_favorite_artworks()
+            if not user_id:
+                return
+
+            artwork_id = input("Enter Artwork ID to remove from favorites: ")
+            if self.virtual_gallery.removeArtworkFromFavorite(user_id, artwork_id):
+                print("Artwork removed from favorites successfully!")
+            else:
+                raise ArtWorkNotFoundException()
+
+        except Exception as e:
+            print(e)
 
     # Gallery
 
@@ -222,10 +223,10 @@ class MainModule:
                 print("---------------------------------------")
                 return True
             else:
-                print("No galleries found.")
-                return False
+                raise GalleryNotFoundException()
         except Exception as e:
-            print(f"Error displaying galleries: {e}")
+            print(e)
+            return False
 
     def create_artist(self):
         try:
@@ -240,8 +241,10 @@ class MainModule:
             print("----------------------------------\n")
             if self.virtual_gallery.addArtist(artist):
                 print("Artist added successfully!")
+            else:
+                raise ArtistNotFoundException("Error Creating Artist")
         except Exception as e:
-            print(f"Error adding artist: {e}")
+            print(e)
 
     def create_gallery(self):
         try:
@@ -253,30 +256,65 @@ class MainModule:
             gallery = Gallery(None, name, description, location, curator, opening_hours)
             if self.virtual_gallery.addGallery(gallery):
                 print("Gallery created successfully!")
+            else:
+                raise GalleryCreationException()
+
         except Exception as e:
-            print(f"Error creating gallery: {e}")
+            print(e)
+
+    def get_gallery_by_id(self):
+        try:
+            gallery_id = input("Enter Gallery ID to retrieve: ")
+            gallery = self.virtual_gallery.getGalleryById(gallery_id)
+            if gallery:
+                print("\n--------Gallery details--------\n")
+                print(gallery)
+                print("-------------------------------\n")
+                return gallery
+            else:
+                raise GalleryNotFoundException()
+
+        except Exception as e:
+            print(e)
+            return False
 
     def update_gallery(self):
-        gall = self.display_galleries()
-        if not gall:
-            return
-
         try:
-            gallery_id = int(input("Enter the ID of the gallery you want to update: "))
-            name = input("Enter new name : ")
-            description = input("Enter new description: ")
-            location = input("Enter new location : ")
-            opening_hours = input("Enter new opening hours : ")
-            curator = input("Enter new curator ID : ")
-            gallery = Gallery(gallery_id, name, description, location, curator, opening_hours)
-            if self.virtual_gallery.updateGallery(gallery):
-                print("Gallery updated successfully!")
+            gallery = self.get_gallery_by_id()
+            if gallery == False:
+                return
+
+            name = input("Enter new Title: ")
+            if name:
+                gallery.setName(name)
+            description = input("Enter new Description: ")
+            if description:
+                gallery.setDescription(description)
+            location = input("Enter new Location: ")
+            if location:
+                gallery.setLocation(location)
+            curator = input("Enter Artist ID ")
+            if curator:
+                gallery.setCurator(curator)
+            opening_hours = input("Enter new Image URL: ")
+            if opening_hours:
+                gallery.setOpeningHours(opening_hours)
+
+            print("\n------ Updated Artwork ------\n")
+            print(gallery)
+            print("-----------------------------\n")
+
+            ch = input("Conform Update (y-yes)(n-no) : ")
+            if ch == 'y':
+                if self.virtual_gallery.updateGallery(gallery):
+                    print("Gallery updated successfully!")
+                else:
+                    raise GalleryNotFoundException("Error Updating Gallery!")
             else:
-                print("Failed to update gallery.")
-        except GalleryNotFoundException as e:
-            print(f"Gallery not found: {e}")
+                print("Updation Cancelled")
+
         except Exception as e:
-            print(f"Error updating gallery: {e}")
+            print(e)
 
     def remove_gallery(self):
         gall = self.display_galleries()
@@ -285,12 +323,13 @@ class MainModule:
 
         try:
             gallery_id = int(input("Enter the ID of the gallery you want to remove: "))
-            self.virtual_gallery.removeGallery(gallery_id)
-            print("Gallery removed successfully!")
-        except GalleryNotFoundException as e:
-            print(f"Gallery not found: {e}")
+            if self.virtual_gallery.removeGallery(gallery_id):
+                print("Gallery removed successfully!")
+            else:
+                raise GalleryNotFoundException("Error Removing Gallery")
+
         except Exception as e:
-            print(f"Error removing gallery: {e}")
+            print(e)
 
     def search_galleries(self):
         keyword = input("Enter keyword to search galleries: ")
@@ -301,9 +340,9 @@ class MainModule:
                 for gallery in galleries:
                     print(gallery)
             else:
-                print("No galleries found matching the keyword.")
+                raise GalleryNotFoundException()
         except Exception as e:
-            print(f"Error searching galleries: {e}")
+            print(e)
 
     def main(self):
         while True:

@@ -8,6 +8,21 @@ class UserNotFoundException(Exception):
         self.message = message
         super().__init__(self.message)
 
+class UserCreationException(Exception):
+    def __init__(self, message="Error Creating User"):
+        self.message = message
+        super().__init__(self.message)
+
+class ArtworkCreationException(Exception):
+    def __init__(self, message="Error Creating Artwork"):
+        self.message = message
+        super().__init__(self.message)
+
+class GalleryCreationException(Exception):
+    def __init__(self, message="Error Creating Gallery"):
+        self.message = message
+        super().__init__(self.message)
+
 class ArtistNotFoundException(Exception):
     def __init__(self, message="Artist not found."):
         self.message = message
